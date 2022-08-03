@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, request
+from flask import Flask, redirect, render_template, url_for, request
 app = Flask(__name__)
 
 from datetime import datetime            
@@ -14,27 +14,25 @@ def block_sites(url):
             hosts_content = hostfile.read()    # here the information is put into one string
             if url not in hosts_content:
                 hostfile.write(redirect + " " + url + "\n")
-                print(url + " Site blocked") 
+                return url + " Site blocked"
 
-@app.route('/login')
-def success(url):
-    block_sites(url)
-    return 'Website blocked'
- 
- 
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    return render_template("index.html")
+
+
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
-        user = request.form['loginUser']
-        return redirect(url_for('success', name=user))
-    else:
-        user = request.args.get('loginUser')
-        return redirect(url_for('success', name=user))
+        user = request.form.get('loginUser')
+        url = request.form.get('loginPassword')
+        message = "<p>"+block_sites(url)+"</p>"
+        return message
+    return render_template("login.html")
 
 
  
  
 if __name__ == '__main__':
     app.run(debug=True) 
-
-@app.route()
